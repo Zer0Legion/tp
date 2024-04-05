@@ -123,7 +123,7 @@ It takes a user input into the UI, `add n|Dohn Joe p|98765432 a|123 e|dohn@gm.co
 **Note:** Similar to the above sequence diagram, the lifeline for `AddCommandParser` and `AddCommand` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline continues till the end of diagram.
 </box>
 
-The parsing is detailed as follows:
+The tokenizing and parsing is detailed as follows:
 <puml src="diagrams/AddCommandParsing.puml" alt="Detailed Interactions for Parsing Fields of the Add command." />
 
 
@@ -170,7 +170,7 @@ Classes used by multiple components are in the `seedu.addressbook.commons` packa
 
 This section describes some noteworthy details on how certain features are implemented.
 
-### **Export Feature**
+### **`export`**
 
 The `export` command allows users to export the details of each person currently displayed in the `PersonListPanel` to a CSV file. The CSV file is generated in the file `./addressbookdata/avengersassemble.csv`.
 
@@ -223,7 +223,7 @@ The following sequence diagram shows the interactions within the different class
       * The `export` feature is not reliant on the `find` feature to update the `filteredPersons` list.
     * Cons: Users need to manually filter and sort through the CSV file if they require certain data which may be less efficient.
 
-### **Copy feature**
+### **`copy`**
 
 The `copy` command enables users to quickly copy the email addresses of the persons currently displayed to them in the
 `PersonListPanel`. The copied emails are stored in the users' clipboard and can be pasted into an email client.
@@ -285,7 +285,7 @@ This approach would allow users to access the emails at a later time and would p
 However, it may be less convenient for users who want to paste the emails directly into an email client.
 
 
-### Addition of fields: Matriculation Number (Matric)
+### Addition of fields: Matriculation Number (`Matric`)
 
 The optional `Matric` field enables the user to store the matriculation number of a person. The field is stored as a `Matric` in the `Person` object.
 The `Studio` and `Reflection` fields are similarly implemented.
@@ -315,7 +315,7 @@ The parser also generates `Tag` objects based on the user input. The existing ta
 The activity diagram is as follows:
 <puml src="diagrams/AutomaticTaggingActivityDiagram.puml" alt="Activity Diagram for Auto Tagging Feature" />
 
-### Import contacts from CSV file
+### `import`
 
 #### Implementation
 
@@ -337,7 +337,7 @@ Reference Diagram for each addCommand in importCommand
 
 <puml src="diagrams/ImportSequenceDiagramRef.puml" alt="Interactions Inside the Add Component for the `import` Command" />
 
-### Design Considerations
+#### Design Considerations
 
 **Aspect: How to handle duplicate persons**
  
@@ -354,7 +354,7 @@ The validities checked are:
 
 If the file is not valid, an error message will be returned.
 
-### **Find feature**
+### **`find`**
 
 The `find` command lets users search for persons by substring matching. The user can select any parameter to search under: `NAME`, `EMAIL`, `TAG`, `MATRIC`, `REFLECTION`, `STUDIO`, and `TAGS` can all be used. E.g. to search for all persons under studio `S2`, the user can use `find s|s2`.
 
@@ -406,11 +406,27 @@ Users can search for contacts based on various details, enhancing the usability 
 
 ##### Predicate-based Filtering
 
-As the `Model` class was built prior to the implementation of this feature, we did our best to re-use available methods instead of unnecessarily re-programing already exisiting logic. Hence, we decided to craft the command around the idea of a custom predicate as the `Model` class already had a `updateFilteredPersonList` method implemented that would filter persons using a predicate.
+As the `Model` class was built prior to the implementation of this feature, we did our best to re-use available methods instead of unnecessarily re-programing already existing logic. Hence, we decided to craft the command around the idea of a custom predicate as the `Model` class already had a `updateFilteredPersonList` method implemented that would filter persons using a predicate.
 
 ##### Extensibility
 
 This design allows for easy extension to accommodate future enhancements or additional search criteria. New prefixes can be added to support additional search criteria without significant changes as we merely need to update our `Predicate` logic. This ensures that the implementation remains adaptable to evolving requirements and we can upgrade and improve the feature whenever required.
+
+### **`deleteShown`**
+
+#### Implementation Details
+
+The `deleteShown` command is a child of the `Command` class and relies on the `filteredPersons` list in the `Model` component to delete the persons currently displayed in the `PersonListPanel`.
+
+##### Executing the Command
+If the list shows between 0 and the total number of existing persons, the `deleteShown` command will delete the persons currently displayed in the `PersonListPanel`.
+
+##### Updating Filtered Person List
+After deleting all persons currently displayed in the `PersonListPanel`, the `filteredPersons` list in the `Model` component is updated to show all remaining persons in the address book.
+
+#### Considerations
+##### Reliance on `find` Command
+Similarly to the `copy` command, the `deleteShown` command is designed to be used with the find command, which filters the persons displayed in the `PersonListPanel`. Consequently, the flexibility of the `deleteShown` command relies heavily on the implementation of the `find` command. Due to this dependency, any changes to the `find` command may affect the functionality of the `deleteShown` command.
 
 ### \[Proposed\] Undo/redo feature
 

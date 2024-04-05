@@ -9,7 +9,43 @@ participant "multi:ArgumentMultimap" as ArgumentMultimap LOGIC_COLOR
 participant ":ParserUtil" as ParserUtil LOGIC_COLOR
 end box
 
-mainFrame sd parse fields
+AddCommandParser -> ArgumentTokenizer : tokenize(...)
+activate ArgumentTokenizer
+
+create ArgumentMultimap
+create ArgumentMultimap
+ArgumentTokenizer -> ArgumentMultimap
+
+activate ArgumentMultimap
+
+ArgumentMultimap --> ArgumentTokenizer
+
+deactivate ArgumentMultimap
+
+ArgumentTokenizer --> AddCommandParser
+deactivate ArgumentTokenizer
+
+AddCommandParser -> AddCommandParser : arePrefixesPresent(...)
+activate AddCommandParser
+AddCommandParser --> AddCommandParser
+deactivate AddCommandParser
+
+AddCommandParser -> ArgumentMultimap : getPreamble()
+activate ArgumentMultimap
+
+ArgumentMultimap --> AddCommandParser
+deactivate ArgumentMultimap
+
+AddCommandParser -> ArgumentMultimap : verifyNoDuplicatePrefixesFor(...)
+activate ArgumentMultimap
+
+ArgumentMultimap --> AddCommandParser
+
+deactivate ArgumentMultimap
+
+deactivate ArgumentTokenizer
+
+mainFrame sd tokenize and parse fields
 AddCommandParser -> ParserUtil : parseName(...)
 activate ParserUtil
 ParserUtil --> AddCommandParser
