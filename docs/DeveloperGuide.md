@@ -75,12 +75,25 @@ The UI consists of a `MainWindow` that is made up of parts e.g.`CommandBox`, `Re
 
 The `UI` component uses the JavaFx UI framework. The layout of these UI parts are defined in matching `.fxml` files that are in the `src/main/resources/view` folder. For example, the layout of the [`MainWindow`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/java/seedu/address/ui/MainWindow.java) is specified in [`MainWindow.fxml`](https://github.com/se-edu/addressbook-level3/tree/master/src/main/resources/view/MainWindow.fxml)
 
-The `UI` component,
+The `CommandBox` takes in user input which is passed onto the `Logic` component for the user input to be parsed and executed. A `CommandResult` is returned after execution and the feedback is displayed to the user through the `ResultDisplay` component of the UI.
+
+For the updating of other components in the UI, after each command execution, `MainWindow` runs an update that calls the update method on `PersonListPanel`, `ExamListPanel` and `StatusBarFooter`.
+
+`PersonListPanel` and `ExamListPanel` update themselves by retrieving the `filteredPersonList` and `examList` from the `Model` component and updating the displayed lists accordingly.
+
+`StatusBarFooter` contains the mean and median feature, and it updates itself by retrieving `ScoreStatistics`
+from the `Model` on update.
+
+In summary, the `UI` component:
 
 * executes user commands using the `Logic` component.
-* listens for changes to `Model` data so that the UI can be updated with the modified data.
+* checks for changes to `Model` data so that the UI can be updated with the modified data.
 * keeps a reference to the `Logic` component, because the `UI` relies on the `Logic` to execute commands.
-* depends on some classes in the `Model` component, as it displays `Person` object residing in the `Model`.
+* depends on some classes in the `Model` component, as the `UI` updates based on items that are stored in `Model`
+
+The sequence diagram below illustrates a more in-depth view of the interactions within the UI component
+
+<puml src="diagrams/UiSequenceDiagram.puml" alt="Sequence Diagram of UI Component"/>
 
 ### Logic component
 
@@ -103,8 +116,11 @@ Here are the other classes in `Logic` (omitted from the class diagram above) tha
 <puml src="diagrams/ParserClasses.puml" width="600"/>
 
 How the parsing works:
-* When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name e.g., `AddCommandParser`) which uses the other classes shown above to parse the user command and create a `XYZCommand` object (e.g., `AddCommand`) which the `AddressBookParser` returns back as a `Command` object.
+
+* When called upon to parse a user command, the `AddressBookParser` class creates an `XYZCommandParser` (`XYZ` is a placeholder for the specific command name e.g., `AddCommandParser`)
+* The `XYZCommandParser` [uses the other classes](#specificParsing) shown above to parse the user command and create a `XYZCommand` object (e.g., `AddCommand`) which the `AddressBookParser` returns back as a `Command` object.
 * All `XYZCommandParser` classes (e.g., `AddCommandParser`, `DeleteCommandParser`, ...) inherit from the `Parser` interface so that they can be treated similarly where possible e.g, during testing.
+
 
 The sequence diagram below illustrates the interactions within the `Logic` component, taking a simple `execute("delete 1")` API call as an example.
 
@@ -113,8 +129,21 @@ The sequence diagram below illustrates the interactions within the `Logic` compo
 **Note:** The lifeline for `DeleteCommandParser` should end at the destroy marker (X) but due to a limitation of PlantUML, the lifeline continues till the end of diagram.
 </box>
 
-The sequence diagram below illustrates a more in-depth view of the interactions within the 'Logic' component.
-It takes a user input into the UI, `add n|Dohn Joe p|98765432 a|123 e|dohn@gm.com m|A1234567X s|S1 r|R1`, as an example.
+<div id="specificParsing"></div>
+
+The following is a more detailed explaination on how user input is parsed into a `Command` object (Not mentioned above for simplicity).
+
+* After the `XYZCommandParser` is instantiated by the `AddressBookParser`, it uses the `ArgumentTokenizer` class to tokenize the user input string into the arguments.
+* It then uses the `ArgumentMultimap` class to extract the arguments based on the prefixes present in the user input string.
+* For some commands, some arguments are mandatory and the `ArgumentMultimap` class is used to check if these mandatory arguments are present. If not, an exception is thrown.
+* For some commands, multiple arguments under the same category (e.g. two name arguments for an AddCommand) are not allowed. The `ArgumentMultimap` class is used to check for undesirable multiple arguments. If multiple arguments are present, an exception is thrown.
+* Validation of each extracted argument is done using the methods defined in the `ParserUtil` class. This class contains methods to validate different arguments extracted by the `ArgumentMultimap` class based on the `VALIDATION_REGEX` defined in component classes (`Name.java`, `Score.java`, etc.).
+* The parsed arguments are then used to create a `XYZCommand` object to be executed.
+
+**Note:** Some commands do not require any arguments (e.g., `help`, `clear`, `list`, `exit`). In such cases, the `XYZCommand` class is directly instantiated by the `AddressBookParser` class without the parsing of arguments. As such, any arguments passed to these commands are ignored.
+
+The sequence diagram below illustrates a more in-depth view of the interactions regarding the parsing of user input.
+It takes an add command: `execute(add n|Dohn Joe p|98765432 a|123 e|dohn@gm.com m|A1234567X s|S1 r|R1)` as an example.
 
 <puml src="diagrams/AddSequenceDiagram.puml" alt="Detailed Interactions Inside the Logic Component for the `add n/Dohn Joe p/98765432 a/123 e/dohn@gm.com m/A1234567X s/S1 r/R1` User Input" />
 
@@ -135,14 +164,16 @@ The tokenizing and parsing is detailed as follows:
 
 The `Model` component,
 
-* stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object).
-* stores the currently 'selected' `Person` objects (e.g., results of a search query) as a separate _filtered_ list which is exposed to outsiders as an unmodifiable `ObservableList<Person>` that can be 'observed' e.g. the UI can be bound to this list so that the UI automatically updates when the data in the list change.
+* stores the address book data i.e., all `Person` objects (which are contained in a `UniquePersonList` object) and all `Exam` objects (which are contained in a `UniqueExamList` object).
+* stores the currently filtered `Person` objects (e.g., results of a search query) as a separate _filtered_ list which is exposed to outsiders as an unmodifiable `ObservableList<Person>` that can be 'observed' e.g. the UI can be bound to this list so that the UI can update when the data in the list changes.
+* stores the currently selected `Exam` which is exposed to outsiders as an unmodifiable `ObservableValue<Exam>`. This is used in conjunction with the exam and exam score implementation, and also used to update the highlighted exam on the UI.
+* stores `ScoreStatistics` for the currently selected `Exam`. This statistic is used in conjunction with the mean and median feature. It is also exposed to outsiders as an unmodifiable `ObservableValue<ScoreStatistics>` so that the UI can be bound to this value for updating.
 * stores a `UserPref` object that represents the user’s preferences. This is exposed to the outside as a `ReadOnlyUserPref` objects.
 * does not depend on any of the other three components (as the `Model` represents data entities of the domain, they should make sense on their own without depending on other components)
 
 <box type="info" seamless>
 
-**Note:** An alternative (arguably, a more OOP) model is given below. It has a `Tag` list in the `AddressBook`, which `Person` references. This allows `AddressBook` to only require one `Tag` object per unique tag, instead of each `Person` needing their own `Tag` objects.<br>
+**Note:** An alternative (arguably, a more OOP) model is given below relating to the `Person` class. It has a `Tag` list in the `AddressBook`, which `Person` references. This allows `AddressBook` to only require one `Tag` object per unique tag, instead of each `Person` needing their own `Tag` objects.<br> However, we opted not to use this model. As much as possible, we tried to keep the attributes of `Person` unlinked to other classes to prevent complications in our saving, import and export functionalities.
 
 <puml src="diagrams/BetterModelClassDiagram.puml" width="450" />
 
@@ -155,7 +186,28 @@ The `Model` component,
 
 <puml src="diagrams/StorageClassDiagram.puml" width="550" />
 
-The `Storage` component,
+#### Saving of data
+
+The `Storage` component uses the `Jackson` library to convert objects to JSON format. The conversion methods are predefined in the `JsonAdapted*` classes for their corresponding objects.
+
+The `Logic` class stores a `StorageManager` object that implements the methods in the `Storage` class. For **every** command that is executed, `Logic` uses `StorageManager` to save the updated `AddressBook` through the `saveAddressBook` method.
+
+The `StorageManager` class calls on the `JsonAddressBookStorage` class to convert all objects in the `AddressBook` to JSON formatting. The converted JSON objects are consolidated in the `JsonSerializableAddressBook` class and it is seraliazed to JSON format and saved using the `saveJsonToFile` method.
+
+The sequence diagram below illustrates how data is saved within the `Storage` component when the user issues a command.
+
+<puml src="diagrams/StorageSequenceDiagram.puml" alt="Sequence Diagram for the `Storage` Component" />
+
+#### Loading of data
+
+When the application is initialised, the `Storage` component reads the JSON objects from the save file and converts them back to objects that can be used to initialise the `Model` component. This is done using the `readJsonFile` method of the `JsonUtil` class which utilises the methods defined in the `JsonAdapted*` classes to convert the saved JSON data back to objects that can be used by the `Model` component.
+
+The sequence diagram below illustrates how data is loaded within the `Storage` component when the application is initialised.
+
+<puml src="diagrams/StorageLoadSequenceDiagram.puml" alt="Sequence Diagram for the `Storage` Component" />
+
+
+In summary, the `Storage` component:
 * can save both address book data and user preference data in JSON format, and read them back into corresponding objects.
 * inherits from both `AddressBookStorage` and `UserPrefStorage`, which means it can be treated as either one (if only the functionality of only one is needed).
 * depends on some classes in the `Model` component (because the `Storage` component's job is to save/retrieve objects that belong to the `Model`)
@@ -176,7 +228,7 @@ The `export` command allows users to export the details of each person currently
 
 #### Implementation Details
 
-The user uses the `find` feature to filter out the relevant persons, which will be displayed in the `PersonListPanel`. 
+The user uses the `find` feature to filter out the relevant persons, which will be displayed in the `PersonListPanel`.
 The `export` feature utilizes the `filteredPersons` list stored in `Model` to retrieve the relavant data displayed in `PersonListPanel`.
 The `export` feature also relies the Jackson Dataformat CSV module and the Jackson Databind module write the details of persons to the CSV file `./addressbookdata/avengersassemble.csv`.
 
@@ -218,7 +270,7 @@ The following sequence diagram shows the interactions within the different class
     * Cons: The extent to which users can filter the persons displayed is highly dependent on the `find` feature.
 
 * **Alternative 2:** Exports **all** contacts stored in the address book.
-    * Pros: 
+    * Pros:
       * Easy to implement.
       * The `export` feature is not reliant on the `find` feature to update the `filteredPersons` list.
     * Cons: Users need to manually filter and sort through the CSV file if they require certain data which may be less efficient.
@@ -231,7 +283,7 @@ This feature is useful when users need to send emails to a group of persons.
 
 #### Implementation Details
 
-The copy command is a child of the `command` class and relies on the `filteredPersons` list in the `Model` component, 
+The copy command is a child of the `command` class and relies on the `filteredPersons` list in the `Model` component,
 as well as the `java.awt` package to copy the emails of all currently displayed persons to the users' clipboard.
 
 #### Parsing User Input
@@ -267,7 +319,7 @@ Due to this dependency, any changes to the `find` command may affect the functio
 
 ##### Extensibility
 
-Due to the simplicity of the `copy` command, there are limited opportunities for extending its functionality. 
+Due to the simplicity of the `copy` command, there are limited opportunities for extending its functionality.
 However, future enhancements could include the ability to copy other details of persons, such as phone numbers or addresses.
 
 ##### Alternative Implementations
@@ -319,7 +371,7 @@ The activity diagram is as follows:
 
 #### Implementation
 
-The `ImportCommand` class is responsible for importing contacts from a CSV file. 
+The `ImportCommand` class is responsible for importing contacts from a CSV file.
 The `ImportCommandParser` class is responsible for parsing the user input and creating an `ImportCommand` object. The `ImportCommand` class then reads the CSV file and add the contacts to the `Model`.
 The import process is done using a series of addCommands, which are executed in the same order as the rows in the CSV file.
 It uses the addCommand so as to take advantage of the validation and error handling that is already implemented in the addCommand.
@@ -329,7 +381,7 @@ The import process is done in the following steps:
 - The addCommand is then executed passing the same model as import command.
 - The addCommand then adds the person to the model.
 
-The sequence diagram below illustrates the interactions within the `Logic` component when the user issues the command `import`. 
+The sequence diagram below illustrates the interactions within the `Logic` component when the user issues the command `import`.
 
 <puml src="diagrams/ImportSequenceDiagram.puml" alt="Interactions Inside the Logic Component for the `import` Command" />
 
@@ -340,7 +392,7 @@ Reference Diagram for each addCommand in importCommand
 #### Design Considerations
 
 **Aspect: How to handle duplicate persons**
- 
+
 Handled by addCommand, which will check if the person already exists in the model. If the person already exists, the addCommand will not add the person and will return an error message.
 
 **Aspect: How to handle invalid CSV files**
@@ -356,7 +408,7 @@ If the file is not valid, an error message will be returned.
 
 ### **`find`**
 
-The `find` command lets users search for persons by substring matching. The user can select any parameter to search under: `NAME`, `EMAIL`, `TAG`, `MATRIC`, `REFLECTION`, `STUDIO`, and `TAGS` can all be used. E.g. to search for all persons under studio `S2`, the user can use `find s|s2`.
+The `find` command lets users search for persons by substring matching. The user can select any parameter to search under: `NAME`, `EMAIL`, `TAG`, `MATRIC`, `REFLECTION`, `STUDIO`, and `TAGS` can all be used. E.g. to search for all persons under studio `S2`, the user can use `find s|s2`. The user can also use two other prefixes: `lt` and `mt` to search for persons with scores less than or more than a certain value respectively. E.g. `find mt|50` will return all persons with scores more than 50.
 
 #### Implementation Details
 The `find` feature makes use of the predicate class `PersonDetailContainsKeywordPredicate` and the method `updateFilteredPersonList` to update the model to show only persons that fufill the criteria that the user has keyed in.
@@ -385,7 +437,7 @@ When the `FindCommand` is executed, the `updateFilteredPersonList` method is cal
 
 ##### User Interface Interaction
 
-After the `filteredPersons` list is updated, the user interface is updated such that the `PersonListPanel` now shows persons the fufill the predicate generated by the original user input.
+After the `filteredPersons` list is updated, the user interface is updated such that the `PersonListPanel` now shows persons that fufill the predicate generated by the original user input.
 
 The following sequence diagram illustrates the `find` command with the user input `find n|Alice`
 <puml src="diagrams/FindImplementationSequenceDiagram.puml" width="550" />
@@ -820,12 +872,12 @@ into user's clipboard.
 
 * 2a. No persons are listed.
     * 2a1. AddressBook displays a message indicating that there is no persons to delete.
-  
+
         Use case ends.
 
 * 2b. User has a filtered view that contains all existing persons.
      * 2b1. AddressBook displays a message indicating that all persons cannot be deleted at once.
-    
+
         Use case ends.
 
 **Use case: UC12 — Import Exam Results**
@@ -840,7 +892,7 @@ into user's clipboard.
 
 * 2a. AddressBook cannot find the file specified.
     * 2a1. AddressBook displays a message indicating that the file is not recognised.
-  
+
         Use case ends.
 * 2b. The file to be imported is not a csv file.
     * 2b1. AddressBook displays an error message indicating that the file type is not recognised and should be a csv file
@@ -848,11 +900,11 @@ into user's clipboard.
         Use case ends.
 * 2c. There are duplicate entries in the csv file.
     * 2c1. AddressBook displays a message indicating that there are duplicate entries in the csv file, and only the first instance has been kept.
-  
+
         Use case ends.
 * 2d. The csv file contains invalid entries.
     * 2d1. AddressBook displays a message indicating that there are invalid entries in the csv file, and all other valid entries have been imported.
-  
+
         Use case ends.
 
 **Use case: UC13 — Exit application**

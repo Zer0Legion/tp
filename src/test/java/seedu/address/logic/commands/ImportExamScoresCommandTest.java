@@ -43,7 +43,6 @@ public class ImportExamScoresCommandTest {
     @Test
     public void execute_validFilePath_success() {
         Path filePath = Paths.get(PATH_EMPTY_CSV);
-        String expectedMessage = String.format(ImportExamScoresCommand.MESSAGE_SUCCESS, filePath);
         importExamScoresCommand = new ImportExamScoresCommand(filePath);
 
         assertCommandFailure(importExamScoresCommand, model, ImportExamScoresCommand.ERROR_EMAIL_FIRST_VALUE);
@@ -87,9 +86,10 @@ public class ImportExamScoresCommandTest {
         ImportExamScoresCommand importExamScoresCommand = new ImportExamScoresCommand(filePath);
 
         String expectedError = buildErrorReport(filePath.toString(),
-                "non@example.com: " + ImportExamScoresCommand.MESSAGE_PERSON_DOES_NOT_EXIST,
-                "johnd@example.com: " + String.format(ImportExamScoresCommand.MESSAGE_GRADE_TOO_HIGH, "Midterm"),
-                "NonExistent: " + ImportExamScoresCommand.MESSAGE_EXAM_DOES_NOT_EXIST);
+                "email of non@example.com: " + ImportExamScoresCommand.MESSAGE_PERSON_DOES_NOT_EXIST,
+                "email of johnd@example.com: " + String.format(
+                        ImportExamScoresCommand.MESSAGE_GRADE_TOO_HIGH, "Midterm"),
+                "exam of NonExistent: " + ImportExamScoresCommand.MESSAGE_EXAM_DOES_NOT_EXIST);
 
         assertCommandSuccess(importExamScoresCommand, model, expectedError, model);
     }
@@ -100,7 +100,7 @@ public class ImportExamScoresCommandTest {
         ImportExamScoresCommand importExamScoresCommand = new ImportExamScoresCommand(filePath);
 
         String expectedError = buildErrorReport(filePath.toString(),
-                "alice@example.com: "
+                "email of alice@example.com: "
                         + String.format(ImportExamScoresCommand.MESSAGE_SCORE_NOT_NUMBER, "Midterm"));
 
         assertCommandSuccess(importExamScoresCommand, model, expectedError, model);
@@ -112,7 +112,7 @@ public class ImportExamScoresCommandTest {
         ImportExamScoresCommand importExamScoresCommand = new ImportExamScoresCommand(filePath);
 
         String expectedError = buildErrorReport(filePath.toString(),
-                "Midterm: " + ImportExamScoresCommand.MESSAGE_DUPLICATE_EXAM);
+                "exam of Midterm: " + ImportExamScoresCommand.MESSAGE_DUPLICATE_EXAM);
         assertCommandSuccess(importExamScoresCommand, model, expectedError, model);
     }
 

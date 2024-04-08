@@ -228,7 +228,7 @@ public class ParserUtil {
         requireNonNull(filePath);
         String trimmedTag = filePath.trim();
         // add error handling for what to do when invalid input is passed
-        return Paths.get(filePath);
+        return Paths.get(trimmedTag);
     }
 
     /**

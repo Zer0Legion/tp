@@ -1,0 +1,59 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+box UI UI_COLOR_T1
+participant ":CommandBox" as CommandBox UI_COLOR
+participant ":MainWindow" as MainWindow UI_COLOR
+participant ":ResultDisplay" as ResultDisplay UI_COLOR
+participant ":PersonListPanel" as PersonListPanel UI_COLOR
+participant ":ExamListPanel" as ExamListPanel UI_COLOR
+participant ":StatusBarFooter" as StatusBarFooter UI_COLOR
+end box
+
+box Logic LOGIC_COLOR_T1
+participant ":Logic" as Logic LOGIC_COLOR
+end box
+
+[-> CommandBox : userInput
+activate CommandBox
+
+CommandBox -> MainWindow : execute(userInput)
+activate MainWindow
+
+MainWindow -> Logic : execute(userInput)
+activate Logic
+
+Logic --> MainWindow : commandResult
+deactivate Logic
+
+MainWindow -> ResultDisplay : setFeedbackToUser(...)
+activate ResultDisplay
+
+ResultDisplay --> MainWindow
+deactivate ResultDisplay
+
+MainWindow -> PersonListPanel : update()
+activate PersonListPanel
+
+PersonListPanel --> MainWindow
+deactivate PersonListPanel
+
+MainWindow -> ExamListPanel : update()
+activate ExamListPanel
+
+ExamListPanel --> MainWindow
+deactivate ExamListPanel
+
+MainWindow -> StatusBarFooter : update()
+activate StatusBarFooter
+
+StatusBarFooter --> MainWindow
+deactivate StatusBarFooter
+
+MainWindow --> CommandBox
+deactivate MainWindow
+
+[<-- CommandBox
+deactivate CommandBox
+@enduml

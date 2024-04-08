@@ -3,24 +3,18 @@
 skinparam ArrowFontStyle plain
 
 box Logic LOGIC_COLOR_T1
-participant ":LogicManager" as LogicManager LOGIC_COLOR
 participant ":AddressBookParser" as AddressBookParser LOGIC_COLOR
 participant ":AddCommandParser" as AddCommandParser LOGIC_COLOR
 participant "a:AddCommand" as AddCommand LOGIC_COLOR
-participant "r:CommandResult" as CommandResult LOGIC_COLOR
 end box
 
 
 
 box Model MODEL_COLOR_T1
 participant "p:Person" as Person MODEL_COLOR
-participant "m:Model" as Model MODEL_COLOR
 end box
 
-[-> LogicManager : execute(...)
-activate LogicManager
-
-LogicManager -> AddressBookParser : parseCommand(...)
+[-> AddressBookParser : parseCommand(...)
 activate AddressBookParser
 
 create AddCommandParser
@@ -56,30 +50,7 @@ deactivate AddCommandParser
 AddCommandParser -[hidden]-> AddressBookParser
 destroy AddCommandParser
 
-AddressBookParser --> LogicManager : a
+[<-- AddressBookParser :
 deactivate AddressBookParser
 
-LogicManager -> AddCommand : execute(m)
-activate AddCommand
-
-AddCommand -> Model : addPerson(p)
-activate Model
-
-Model --> AddCommand
-deactivate Model
-
-create CommandResult
-AddCommand -> CommandResult
-activate CommandResult
-
-CommandResult --> AddCommand
-deactivate CommandResult
-
-AddCommand --> LogicManager : r
-deactivate AddCommand
-AddCommand -[hidden]-> LogicManager
-destroy AddCommand
-
-[<--LogicManager
-deactivate LogicManager
 @enduml

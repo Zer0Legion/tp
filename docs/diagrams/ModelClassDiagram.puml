@@ -13,6 +13,7 @@ Class ModelManager
 Class UserPrefs
 
 Class UniquePersonList
+Class UniqueExamList
 Class Person
 Class Address
 Class Email
@@ -22,6 +23,8 @@ Class Matric
 Class Studio
 Class Reflection
 Class Tag
+Class Exam
+Class Score
 
 Class I #FFFFFF
 }
@@ -39,16 +42,19 @@ ModelManager -right-> "1" UserPrefs
 UserPrefs .up.|> ReadOnlyUserPrefs
 
 AddressBook *--> "1" UniquePersonList
-UniquePersonList --> "~* all" Person
+AddressBook *--> "1" UniqueExamList
+UniquePersonList -[hidden]left-> UniqueExamList
+UniquePersonList --> "      ~* all" Person
+UniqueExamList --> "*" Exam
 Person *-l-> Name
 Person *--> Phone
 Person *--> Email
 Person *--> Address
 Person *--> "0..1" Matric
 Person *--> "0..1" Studio
-Person *--> "0..1" Reflection
+Person *--> "  0..1" Reflection
 Person *-r-> "*" Tag
-
+Person *--> "*" Score
 
 Person -[hidden]up--> I
 UniquePersonList -[hidden]right-> I
@@ -61,5 +67,5 @@ Matric -[hidden]right-> Studio
 Studio -[hidden]right-> Reflection
 Reflection -[hidden]up-> Tag
 
-ModelManager --> "~* filtered" Person
+ModelManager --> "~* filtered    " Person
 @enduml

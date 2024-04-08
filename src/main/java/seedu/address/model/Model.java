@@ -158,5 +158,5 @@ public interface Model {
     /**
      * Returns the exam score statistics for the given exam.
      */
-    ScoreStatistics getExamScoreStatistics(Exam exam);
+    ObservableValue<ScoreStatistics> getSelectedExamStatistics();
 }

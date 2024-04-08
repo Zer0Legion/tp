@@ -18,7 +18,7 @@ public class AddExamCommand extends Command {
     public static final String COMMAND_WORD = "addExam";
 
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Adds an exam to the address book. "
-            + "Parameters: EXAM_NAME n/EXAM_DETAILS s/MAXIMUM_SCORE\n"
+            + "Parameters: " + PREFIX_NAME + "EXAM_NAME " + PREFIX_SCORE + "MAXIMUM_SCORE\n"
             + "Example: " + COMMAND_WORD + " "
             + PREFIX_NAME + "Midterm " + PREFIX_SCORE + "100";
 

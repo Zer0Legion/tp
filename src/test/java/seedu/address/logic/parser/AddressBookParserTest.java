@@ -36,7 +36,6 @@ import seedu.address.logic.commands.ListCommand;
 import seedu.address.logic.commands.SelectExamCommand;
 import seedu.address.logic.parser.exceptions.ParseException;
 import seedu.address.model.person.Person;
-import seedu.address.model.person.PersonDetailContainsKeywordPredicate;
 import seedu.address.model.person.Score;
 import seedu.address.testutil.EditPersonDescriptorBuilder;
 import seedu.address.testutil.PersonBuilder;
@@ -96,7 +95,7 @@ public class AddressBookParserTest {
         String parameter = "Johan";
         FindCommand command = (FindCommand) parser.parseCommand(
                 FindCommand.COMMAND_WORD + " " + prefix + parameter);
-        assertEquals(new FindCommand(new PersonDetailContainsKeywordPredicate(PREFIX_NAME, parameter)), command);
+        assertEquals(new FindCommand(PREFIX_NAME, parameter), command);
     }
 
     @Test

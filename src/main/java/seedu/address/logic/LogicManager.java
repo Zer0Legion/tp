@@ -85,8 +85,8 @@ public class LogicManager implements Logic {
     }
 
     @Override
-    public ScoreStatistics getExamScoreStatistics(Exam exam) {
-        return model.getExamScoreStatistics(exam);
+    public ObservableValue<ScoreStatistics> getSelectedExamStatistics() {
+        return model.getSelectedExamStatistics();
     }
 
     @Override

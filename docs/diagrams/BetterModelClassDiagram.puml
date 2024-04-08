@@ -22,6 +22,7 @@ Person *--> Address
 Person *--> "0..1" Matric
 Person *--> "0..1" Studio
 Person *--> "0..1" Reflection
+Person *--> "*" Score
 
 Name -[hidden]right-> Phone
 Phone -[hidden]right-> Address

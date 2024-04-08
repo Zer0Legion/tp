@@ -23,25 +23,27 @@ public class ImportExamScoresCommand extends Command {
 
     public static final String COMMAND_WORD = "importExamScores";
     public static final String MESSAGE_USAGE = COMMAND_WORD + ": Imports exam scores from specified filepath."
-            + " Must be an absolute CSV file path. Parameter: "
+            + " Must be an absolute CSV file path without any inverted commas. Parameter: "
             + PREFIX_IMPORT + "FILEPATH\n"
             + "Example: " + COMMAND_WORD + " " + PREFIX_IMPORT + "C:usr/lib/text.csv";
-    public static final String MESSAGE_SCORE_NOT_NUMBER = "Score for %s is not a number";
-    public static final String MESSAGE_PERSON_DOES_NOT_EXIST = "Person does not exist";
+    public static final String MESSAGE_SCORE_NOT_NUMBER = "Score for %s is not a valid score";
+    public static final String MESSAGE_PERSON_DOES_NOT_EXIST = "Person with the given email does not exist";
     public static final String MESSAGE_SUCCESS = "Imported exam scores from: %s";
     public static final String MESSAGE_DUPLICATE_EXAM =
             "Duplicate exam header. Only the records of the first exam will be imported if present.";
-    public static final String EXAM_HEADER = "Exam:";
+    public static final String EXAM_CSV_HEADER = "Exam:";
     public static final String PREFIX_ERROR_REPORT =
-            "\nBelow are the errors that occurred while importing exam scores:\n";
+            "\nBelow are the errors for any rows that were skipped:\n";
     public static final String MESSAGE_EXAM_DOES_NOT_EXIST = "Exam does not exist";
     public static final String MESSAGE_GRADE_TOO_HIGH = "Grade for %s exceeds maximum score";
     public static final String HEADER_EMAIL = "email";
+    public static final String HEADER_EXAM = "exam";
     public static final String ERROR_EMAIL_FIRST_VALUE =
-            "Please ensure that the email column is the first column in the CSV file.";
+            "Please ensure that the email column exists only in the first column in the CSV file, without duplicates.";
     public static final String ERROR_WRONG_CSV_FORMAT = "Please ensure that the CSV file is in the correct format.\n"
             + "The first row should contain the headers of the exams and the first column should contain the emails.\n"
             + "There should be no empty cells in the CSV file.";
+    public static final String ERROR_BUILDER = "%s of %s: %s\n";
     private StringBuilder errorReport;
     private Path filepath;
 
@@ -58,11 +60,12 @@ public class ImportExamScoresCommand extends Command {
 
     /**
      * Adds an error to the error report.
+     * @param field the offending field
      * @param subject the subject of the error
      * @param error the error message
      */
-    void addToErrorReport(String subject, String error) {
-        errorReport.append(String.format("%s: %s\n", subject, error));
+    void addToErrorReport(String field, String subject, String error) {
+        errorReport.append(String.format(ERROR_BUILDER, field, subject, error));
     }
 
     /**
@@ -84,7 +87,7 @@ public class ImportExamScoresCommand extends Command {
         for (int i = 1; i < examNames.length; i++) {
             if (!uniqueExamNames.add(examNames[i]) && isExam(examNames[i])) {
                 addToErrorReport(
-                        getExamName(examNames[i]), MESSAGE_DUPLICATE_EXAM);
+                        HEADER_EXAM, getExamName(examNames[i]), MESSAGE_DUPLICATE_EXAM);
             }
         }
     }
@@ -145,7 +148,8 @@ public class ImportExamScoresCommand extends Command {
             map.get(examNames[j]).put(email, new Score(Double.parseDouble(row[j])).getScore());
         } else {
             if (isExam(examNames[j])) {
-                addToErrorReport(email, String.format(MESSAGE_SCORE_NOT_NUMBER, getExamName(examNames[j])));
+                addToErrorReport(
+                        HEADER_EMAIL, email, String.format(MESSAGE_SCORE_NOT_NUMBER, getExamName(examNames[j])));
             }
         }
     }
@@ -159,7 +163,7 @@ public class ImportExamScoresCommand extends Command {
                 Exam exam = exams.get(0);
                 insertGrades(headers, model, exam, examNames[i]);
             } else {
-                addToErrorReport((String) examNames[i], MESSAGE_EXAM_DOES_NOT_EXIST);
+                addToErrorReport(HEADER_EXAM, (String) examNames[i], MESSAGE_EXAM_DOES_NOT_EXIST);
             }
         }
     }
@@ -184,10 +188,10 @@ public class ImportExamScoresCommand extends Command {
             if (grade <= exam.maxScore.value) {
                 model.addExamScoreToPerson(person, exam, new Score(grade));
             } else {
-                addToErrorReport(email, String.format(MESSAGE_GRADE_TOO_HIGH, exam.getName()));
+                addToErrorReport(HEADER_EMAIL, email, String.format(MESSAGE_GRADE_TOO_HIGH, exam.getName()));
             }
         } else {
-            addToErrorReport(email, MESSAGE_PERSON_DOES_NOT_EXIST);
+            addToErrorReport(HEADER_EMAIL, email, MESSAGE_PERSON_DOES_NOT_EXIST);
         }
     }
 
@@ -211,7 +215,7 @@ public class ImportExamScoresCommand extends Command {
                 String.format(MESSAGE_SUCCESS, filepath.toString()) + generateErrorReport());
     }
 
-    private void parseScoresFromRawCsv(Model model, List<String[]> lst) {
+    private void parseScoresFromRawCsv(Model model, List<String[]> lst) throws CommandException {
         reverse(lst);
         HashMap<String, HashMap<String, Double>> headers = createExamsMapping(lst);
 
@@ -241,7 +245,7 @@ public class ImportExamScoresCommand extends Command {
     }
 
     private boolean isExam(String examName) {
-        return examName.startsWith(EXAM_HEADER);
+        return examName.startsWith(EXAM_CSV_HEADER);
     }
 
     private boolean isEmailHeader(String header) {
@@ -251,7 +255,7 @@ public class ImportExamScoresCommand extends Command {
     // Utility methods
 
     private String getExamName(String examName) {
-        return examName.substring(EXAM_HEADER.length()).strip();
+        return examName.substring(EXAM_CSV_HEADER.length()).strip();
     }
 
     private HashMap<String, HashMap<String, Double>> removeNonExams(HashMap<String, HashMap<String, Double>> map) {
@@ -289,7 +293,16 @@ public class ImportExamScoresCommand extends Command {
     }
 
     boolean isEmailFirstValue(List<String[]> lst) {
-        return lst.size() > 0 && lst.get(0).length > 0 && lst.get(0)[0].equals(HEADER_EMAIL);
+        if (!(lst.size() > 0 && lst.get(0).length > 0 && lst.get(0)[0].equals(HEADER_EMAIL))) {
+            return false;
+        }
+        for (int i = 0; i < lst.get(0).length; i++) {
+            if (i != 0 && lst.get(0)[i].equals(HEADER_EMAIL)) {
+                return false;
+            }
+        }
+        return true;
     }
+
 
 }

@@ -13,24 +13,24 @@ import org.junit.jupiter.api.Test;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.testutil.TypicalPersons;
 
-public class PersonDetailContainsKeywordAndExamPredicateTest {
+public class ExamPredicateTest {
 
     @Test
     public void equals() {
         String firstPredicateKeyword = "55";
         String secondPredicateKeyword = "45";
 
-        PersonDetailContainsKeywordAndExamPredicate firstPredicate =
-                new PersonDetailContainsKeywordAndExamPredicate(
+        ExamPredicate firstPredicate =
+                new ExamPredicate(
                         PREFIX_LESS_THAN, firstPredicateKeyword, TypicalPersons.MIDTERM);
-        PersonDetailContainsKeywordAndExamPredicate secondPredicate =
-                new PersonDetailContainsKeywordAndExamPredicate(
+        ExamPredicate secondPredicate =
+                new ExamPredicate(
                         PREFIX_LESS_THAN, secondPredicateKeyword, TypicalPersons.MIDTERM);
-        PersonDetailContainsKeywordAndExamPredicate thirdPredicate =
-                new PersonDetailContainsKeywordAndExamPredicate(
+        ExamPredicate thirdPredicate =
+                new ExamPredicate(
                         PREFIX_MORE_THAN, firstPredicateKeyword, TypicalPersons.MIDTERM);
-        PersonDetailContainsKeywordAndExamPredicate fourthPredicate =
-                new PersonDetailContainsKeywordAndExamPredicate(
+        ExamPredicate fourthPredicate =
+                new ExamPredicate(
                         PREFIX_MORE_THAN, secondPredicateKeyword, TypicalPersons.MIDTERM);
 
         // same object -> returns true
@@ -43,8 +43,8 @@ public class PersonDetailContainsKeywordAndExamPredicateTest {
         assertFalse(firstPredicate.equals(null));
 
         // same values -> returns true
-        PersonDetailContainsKeywordAndExamPredicate firstPredicateCopy =
-                new PersonDetailContainsKeywordAndExamPredicate(
+        ExamPredicate firstPredicateCopy =
+                new ExamPredicate(
                         PREFIX_LESS_THAN, firstPredicateKeyword, TypicalPersons.MIDTERM);
 
         assertEquals(firstPredicate, firstPredicateCopy);
@@ -62,12 +62,12 @@ public class PersonDetailContainsKeywordAndExamPredicateTest {
     @Test
     public void toString_validParams_returnsCorrectString() {
         String keyword = "55";
-        PersonDetailContainsKeywordAndExamPredicate predicate =
-                new PersonDetailContainsKeywordAndExamPredicate(
+        ExamPredicate predicate =
+                new ExamPredicate(
                         PREFIX_LESS_THAN, keyword, TypicalPersons.MIDTERM);
 
         String expectedString = new ToStringBuilder("seedu.address.model.person."
-                + "PersonDetailContainsKeywordAndExamPredicate")
+                + "ExamPredicate")
                 .add("prefix", PREFIX_LESS_THAN)
                 .add("keyword", keyword)
                 .add("exam", TypicalPersons.MIDTERM)
@@ -79,8 +79,8 @@ public class PersonDetailContainsKeywordAndExamPredicateTest {
     @Test
     public void test_prefixGreaterThanKeyword_returnsTrue() {
         // One keyword
-        PersonDetailContainsKeywordAndExamPredicate predicate =
-                new PersonDetailContainsKeywordAndExamPredicate(
+        ExamPredicate predicate =
+                new ExamPredicate(
                         PREFIX_MORE_THAN, "55", TypicalPersons.MIDTERM);
 
         // keyword matches score
@@ -93,8 +93,8 @@ public class PersonDetailContainsKeywordAndExamPredicateTest {
     @Test
     public void test_examNotFound_returnsFalse() {
         // One keyword
-        PersonDetailContainsKeywordAndExamPredicate predicate =
-                new PersonDetailContainsKeywordAndExamPredicate(
+        ExamPredicate predicate =
+                new ExamPredicate(
                         PREFIX_MORE_THAN, "55", TypicalPersons.QUIZ);
 
         // keyword matches score for different exam
@@ -107,8 +107,8 @@ public class PersonDetailContainsKeywordAndExamPredicateTest {
     @Test
     public void test_wrongPrefix_returnsFalse() {
         // One keyword
-        PersonDetailContainsKeywordAndExamPredicate predicate =
-                new PersonDetailContainsKeywordAndExamPredicate(
+        ExamPredicate predicate =
+                new ExamPredicate(
                 PREFIX_NAME, "55", TypicalPersons.MIDTERM);
 
         // should not match
@@ -117,8 +117,8 @@ public class PersonDetailContainsKeywordAndExamPredicateTest {
 
     @Test
     public void isExamRequired_validPrefixes_returnsTrue() {
-        PersonDetailContainsKeywordAndExamPredicate predicate =
-                new PersonDetailContainsKeywordAndExamPredicate(
+        ExamPredicate predicate =
+                new ExamPredicate(
                         PREFIX_MORE_THAN, "55", TypicalPersons.MIDTERM);
 
         assertTrue(predicate.isExamRequired());
@@ -126,8 +126,8 @@ public class PersonDetailContainsKeywordAndExamPredicateTest {
 
     @Test
     public void isExamRequired_invalidPrefixes_returnsFalse() {
-        PersonDetailContainsKeywordAndExamPredicate predicate =
-                new PersonDetailContainsKeywordAndExamPredicate(
+        ExamPredicate predicate =
+                new ExamPredicate(
                 PREFIX_NAME, "55", TypicalPersons.MIDTERM);
 
         assertFalse(predicate.isExamRequired());

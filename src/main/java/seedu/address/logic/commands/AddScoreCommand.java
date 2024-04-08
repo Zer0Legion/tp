@@ -2,6 +2,7 @@ package seedu.address.logic.commands;
 
 import static seedu.address.commons.util.CollectionUtil.isAnyNonNull;
 import static seedu.address.commons.util.CollectionUtil.requireAllNonNull;
+import static seedu.address.logic.parser.CliSyntax.PREFIX_SCORE;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,9 +28,9 @@ public class AddScoreCommand extends Command {
     public static final String MESSAGE_USAGE = COMMAND_WORD
             + ": Adds a score to the person identified by the index number used in the last person listing. "
             + "Parameters: INDEX (must be a positive integer) "
-            + "s/SCORE\n"
+            + PREFIX_SCORE + "SCORE\n"
             + "Example: " + COMMAND_WORD + " 1 "
-            + "s/85";
+            + PREFIX_SCORE + "85";
 
     public static final String MESSAGE_ADD_SCORE_SUCCESS = "Added score %s for %s";
     public static final String MESSAGE_SCORE_EXISTS = "This person already has a score for this exam."
@@ -74,7 +75,6 @@ public class AddScoreCommand extends Command {
         }
 
         model.addExamScoreToPerson(personToEdit, selectedExam, score);
-
         return new CommandResult(String.format("Added score %s for %s", score, personToEdit.getName()));
     }
 

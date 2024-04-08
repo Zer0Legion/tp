@@ -144,7 +144,7 @@ public class ModelStub implements Model {
     }
 
     @Override
-    public ScoreStatistics getExamScoreStatistics(Exam exam) {
+    public ObservableValue<ScoreStatistics> getSelectedExamStatistics() {
         throw new AssertionError("This method should not be called.");
     }
 

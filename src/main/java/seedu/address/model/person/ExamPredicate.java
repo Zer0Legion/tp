@@ -12,7 +12,7 @@ import seedu.address.model.exam.Exam;
 /**
  * Tests that a {@code Person}'s details contains the keyword given.
  */
-public class PersonDetailContainsKeywordAndExamPredicate implements Predicate<Person> {
+public class ExamPredicate implements Predicate<Person> {
     private final Prefix prefix;
     private final String keyword;
     private final Exam exam;
@@ -22,7 +22,7 @@ public class PersonDetailContainsKeywordAndExamPredicate implements Predicate<Pe
      * @param prefix The prefix to indicate the detail of the person to be searched.
      * @param keyword The keyword to be searched.
      */
-    public PersonDetailContainsKeywordAndExamPredicate(Prefix prefix, String keyword, Exam exam) {
+    public ExamPredicate(Prefix prefix, String keyword, Exam exam) {
         this.prefix = prefix;
         this.keyword = keyword;
         this.exam = exam;
@@ -83,12 +83,12 @@ public class PersonDetailContainsKeywordAndExamPredicate implements Predicate<Pe
         }
 
         // instanceof handles nulls
-        if (!(other instanceof PersonDetailContainsKeywordAndExamPredicate)) {
+        if (!(other instanceof ExamPredicate)) {
             return false;
         }
 
-        PersonDetailContainsKeywordAndExamPredicate otherPredicate =
-            (PersonDetailContainsKeywordAndExamPredicate) other;
+        ExamPredicate otherPredicate =
+            (ExamPredicate) other;
 
         return keyword.equals(otherPredicate.keyword) && prefix.equals(otherPredicate.prefix)
                 && exam.equals(otherPredicate.exam);

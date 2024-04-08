@@ -12,17 +12,24 @@ public class Email {
     private static final String SPECIAL_CHARACTERS = "+_.-";
     public static final String MESSAGE_CONSTRAINTS = "Emails should be of the format local-part@domain, "
             + "contain up to 100 characters, and adhere to the following constraints:\n"
-            + "1. The local-part should only contain alphanumeric characters "
-            + "and these special characters, excluding "
-            + "the parentheses, (" + SPECIAL_CHARACTERS + "). The local-part may not start or end with any special "
-            + "characters.\n"
+            + "1. The initial part of the email consists of the local-part.\n"
+            + "The local-part must:\n"
+            + "    - have at least one character\n"
+            + "    - only contain alphanumeric characters and these special characters, "
+            + "excluding the parentheses, (" + SPECIAL_CHARACTERS + ")\n"
+            + "    - not start or end with any special characters\n"
+            + "    - not contain two consecutive special characters\n"
             + "2. This is followed by a '@' and then a domain name. "
             + "The domain name is made up of domain labels "
-            + "separated by periods.\n"
+            + "which may be separated by periods.\n"
             + "The domain name must:\n"
+            + "    - have at least one domain label\n"
+            + "    - seperate domain labels by periods\n"
             + "    - end with a domain label at least 2 characters long\n"
-            + "    - have each domain label start and end with alphanumeric characters\n"
-            + "    - have each domain label consist of alphanumeric characters, separated only by hyphens, if any.";
+            + "The domain labels must:\n"
+            + "    - start and end with alphanumeric characters\n"
+            + "    - not contain two consecutive hyphens\n"
+            + "    - only contain alphanumeric characters and hyphens";
     // alphanumeric and special characters
     private static final String ALPHANUMERIC_NO_UNDERSCORE = "[^\\W_]+";
     private static final String LOCAL_PART_REGEX = "^" + ALPHANUMERIC_NO_UNDERSCORE

@@ -6,13 +6,14 @@ skinparam classBackgroundColor UI_COLOR
 
 package UI <<Rectangle>>{
 Class "<<interface>>\nUi" as Ui
-Class "{abstract}\nUiPart" as UiPart
 Class UiManager
 Class MainWindow
 Class HelpWindow
 Class ResultDisplay
 Class PersonListPanel
+Class ExamListPanel
 Class PersonCard
+Class ExamCard
 Class StatusBarFooter
 Class CommandBox
 }
@@ -31,30 +32,22 @@ HiddenOutside ..> Ui
 UiManager .left.|> Ui
 UiManager -down-> "1" MainWindow
 MainWindow *-down->  "1" CommandBox
-MainWindow *-down-> "1" ResultDisplay
+MainWindow *-left-> "1" ResultDisplay
 MainWindow *-down-> "1" PersonListPanel
 MainWindow *-down-> "1" StatusBarFooter
-MainWindow --> "0..1" HelpWindow
+MainWindow *-down-> "1" ExamListPanel
 
 PersonListPanel -down-> "*" PersonCard
+ExamListPanel -down-> "*" ExamCard
+ExamListPanel -[hidden]down-> StatusBarFooter
 
-MainWindow -left-|> UiPart
+ResultDisplay -[hidden]down-> PersonListPanel
 
-ResultDisplay --|> UiPart
-CommandBox --|> UiPart
-PersonListPanel --|> UiPart
-PersonCard --|> UiPart
-StatusBarFooter --|> UiPart
-HelpWindow --|> UiPart
+PersonCard .down.> Model
+ExamCard .down.> Model
+StatusBarFooter .down.> Model
 
-PersonCard ..> Model
 UiManager -right-> Logic
 MainWindow -left-> Logic
 
-PersonListPanel -[hidden]left- HelpWindow
-HelpWindow -[hidden]left- CommandBox
-CommandBox -[hidden]left- ResultDisplay
-ResultDisplay -[hidden]left- StatusBarFooter
-
-MainWindow -[hidden]-|> UiPart
 @enduml

@@ -47,7 +47,7 @@ public interface Logic {
     /**
      * Returns the exam score statistics for the given exam.
      */
-    ScoreStatistics getExamScoreStatistics(Exam exam);
+    ObservableValue<ScoreStatistics> getSelectedExamStatistics();
 
     /**
      * Returns the user prefs' address book file path.

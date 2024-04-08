@@ -29,7 +29,8 @@ import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
 import seedu.address.model.exam.Exam;
-import seedu.address.model.person.PersonDetailContainsKeywordPredicate;
+import seedu.address.model.person.ExamPredicate;
+import seedu.address.model.person.PersonDetailPredicate;
 import seedu.address.model.person.Score;
 
 /**
@@ -41,19 +42,14 @@ public class FindCommandTest {
 
     @Test
     public void equals() {
-        PersonDetailContainsKeywordPredicate firstPredicate =
-                new PersonDetailContainsKeywordPredicate(PREFIX_NAME, "first");
-        PersonDetailContainsKeywordPredicate secondPredicate =
-                new PersonDetailContainsKeywordPredicate(PREFIX_NAME, "second");
-
-        FindCommand findFirstCommand = new FindCommand(firstPredicate);
-        FindCommand findSecondCommand = new FindCommand(secondPredicate);
+        FindCommand findFirstCommand = new FindCommand(PREFIX_NAME, "first");
+        FindCommand findSecondCommand = new FindCommand(PREFIX_NAME, "second");
 
         // same object -> returns true
         assertTrue(findFirstCommand.equals(findFirstCommand));
 
         // same values -> returns true
-        FindCommand findFirstCommandCopy = new FindCommand(firstPredicate);
+        FindCommand findFirstCommandCopy = new FindCommand(PREFIX_NAME, "first");
         assertTrue(findFirstCommand.equals(findFirstCommandCopy));
 
         // different types -> returns false
@@ -69,10 +65,8 @@ public class FindCommandTest {
     @Test
     public void execute_name_noPersonFound() {
         String expectedMessage = String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 0);
-        PersonDetailContainsKeywordPredicate predicate =
-            new PersonDetailContainsKeywordPredicate(PREFIX_NAME, "Adam");
-        FindCommand command = new FindCommand(predicate);
-        expectedModel.updateFilteredPersonList(predicate);
+        FindCommand command = new FindCommand(PREFIX_NAME, "Adam");
+        expectedModel.updateFilteredPersonList(new PersonDetailPredicate(PREFIX_NAME, "Adam"));
         assertCommandSuccess(command, model, expectedMessage, expectedModel);
         assertEquals(Collections.emptyList(), model.getFilteredPersonList());
     }
@@ -80,28 +74,22 @@ public class FindCommandTest {
     @Test
     public void execute_email_multiplePersonsFound() {
         String expectedMessage = String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 7);
-        PersonDetailContainsKeywordPredicate predicate =
-            new PersonDetailContainsKeywordPredicate(PREFIX_EMAIL, "@example.com");
-        FindCommand command = new FindCommand(predicate);
-        expectedModel.updateFilteredPersonList(predicate);
+        FindCommand command = new FindCommand(PREFIX_EMAIL, "@example.com");
+        expectedModel.updateFilteredPersonList(new PersonDetailPredicate(PREFIX_EMAIL, "@example.com"));
         assertCommandSuccess(command, model, expectedMessage, expectedModel);
         assertEquals(Arrays.asList(ALICE, BENSON, CARL, DANIEL, ELLE, FIONA, GEORGE), model.getFilteredPersonList());
     }
 
     @Test
     public void execute_examRequiredNoExamSelected_throwsCommandException() {
-        PersonDetailContainsKeywordPredicate predicate =
-                new PersonDetailContainsKeywordPredicate(PREFIX_LESS_THAN, "50");
-        FindCommand command = new FindCommand(predicate);
+        FindCommand command = new FindCommand(PREFIX_LESS_THAN, "50");
         assertCommandFailure(command, model, Messages.MESSAGE_NO_EXAM_SELECTED);
     }
 
     @Test
     public void execute_examRequiredExamSelectedValueTooHigh_throwsCommandException() {
-        model.selectExam(new Exam("Final", new Score(100)));
-        PersonDetailContainsKeywordPredicate predicate =
-                new PersonDetailContainsKeywordPredicate(PREFIX_MORE_THAN, "101");
-        FindCommand command = new FindCommand(predicate);
+        model.selectExam(new Exam("Midterm", new Score(100)));
+        FindCommand command = new FindCommand(PREFIX_MORE_THAN, "101");
         assertCommandFailure(command, model, FindCommand.MESSAGE_SCORE_GREATER_THAN_MAX);
     }
 
@@ -109,20 +97,19 @@ public class FindCommandTest {
     public void execute_examRequired_multiplePersonsFound() {
         model.selectExam(new Exam("Midterm", new Score(100)));
         String expectedMessage = String.format(MESSAGE_PERSONS_LISTED_OVERVIEW, 3);
-        PersonDetailContainsKeywordPredicate predicate =
-                new PersonDetailContainsKeywordPredicate(PREFIX_LESS_THAN, "55");
-        FindCommand command = new FindCommand(predicate);
-        expectedModel.updateFilteredPersonList(predicate.withExam(model.getSelectedExam().getValue()));
+        FindCommand command = new FindCommand(PREFIX_LESS_THAN, "55");
+        expectedModel.updateFilteredPersonList(new ExamPredicate(PREFIX_LESS_THAN, "55",
+                model.getSelectedExam().getValue()));
         assertCommandSuccess(command, model, expectedMessage, expectedModel);
         assertEquals(Arrays.asList(CARL, DANIEL, ELLE), model.getFilteredPersonList());
     }
 
     @Test
     public void toStringMethod() {
-        PersonDetailContainsKeywordPredicate predicate =
-            new PersonDetailContainsKeywordPredicate(PREFIX_EMAIL, "@example.com");
-        FindCommand findCommand = new FindCommand(predicate);
-        String expected = FindCommand.class.getCanonicalName() + "{predicate=" + predicate + "}";
+        FindCommand findCommand = new FindCommand(PREFIX_EMAIL, "@example.com");
+        String expected = FindCommand.class.getCanonicalName() + "{prefix=" + PREFIX_EMAIL
+                + ", keyword=" + "@example.com" + "}";
+
         assertEquals(expected, findCommand.toString());
     }
 }

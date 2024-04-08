@@ -1,0 +1,49 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+box Logic LOGIC_COLOR_T1
+participant ":Logic" as Logic LOGIC_COLOR
+end box
+
+box Storage STORAGE_COLOR_T1
+participant ":StorageManager" as StorageManager STORAGE_COLOR
+participant ":JsonAddressBookStorage" as JsonAddressBookStorage STORAGE_COLOR
+participant "j:JsonSerializableAddressBook" as JsonSerializableAddressBook STORAGE_COLOR
+participant "<<class>>\nJsonUtil" as JsonUtil STORAGE_COLOR
+end box
+
+[-> Logic : execute(userInput)
+activate Logic
+
+Logic -> StorageManager : saveAddressBook(addressBook)
+activate StorageManager
+
+StorageManager -> JsonAddressBookStorage : saveAddressBook(addressBook, filePath)
+activate JsonAddressBookStorage
+
+create JsonSerializableAddressBook
+JsonAddressBookStorage -> JsonSerializableAddressBook
+activate JsonSerializableAddressBook
+
+JsonSerializableAddressBook --> JsonAddressBookStorage : j
+deactivate JsonSerializableAddressBook
+
+JsonAddressBookStorage -> JsonUtil : saveJsonToFile(j, filePath)
+activate JsonUtil
+
+JsonUtil --> JsonAddressBookStorage
+deactivate JsonUtil
+
+JsonAddressBookStorage --> StorageManager
+deactivate JsonAddressBookStorage
+destroy JsonSerializableAddressBook
+
+StorageManager --> Logic
+deactivate StorageManager
+
+[<-- Logic
+deactivate Logic
+
+
+@enduml

@@ -31,6 +31,7 @@ public class ModelManager implements Model {
     private final UserPrefs userPrefs;
     private final FilteredList<Person> filteredPersons;
     private final SimpleObjectProperty<Exam> selectedExam;
+    private final SimpleObjectProperty<ScoreStatistics> selectedExamStatistics;
 
     /**
      * Initializes a ModelManager with the given addressBook and userPrefs.
@@ -44,6 +45,7 @@ public class ModelManager implements Model {
         this.userPrefs = new UserPrefs(userPrefs);
         filteredPersons = new FilteredList<>(this.addressBook.getPersonList());
         selectedExam = new SimpleObjectProperty<>(null);
+        selectedExamStatistics = new SimpleObjectProperty<>(null);
     }
 
     public ModelManager() {
@@ -130,12 +132,15 @@ public class ModelManager implements Model {
     public void addExamScoreToPerson(Person person, Exam exam, Score score) {
         Person newPerson = person.addExamScore(exam, score);
         setPerson(person, newPerson);
+        updateSelectedExamStatistics();
+
     }
 
     @Override
     public void removeExamScoreFromPerson(Person person, Exam exam) {
         Person newPerson = person.removeExam(exam);
         setPerson(person, newPerson);
+        updateSelectedExamStatistics();
     }
 
     //=========== Filtered Person List Accessors =============================================================
@@ -207,11 +212,13 @@ public class ModelManager implements Model {
     public void selectExam(Exam target) {
         requireNonNull(target);
         selectedExam.set(target);
+        updateSelectedExamStatistics();
     }
 
     @Override
     public void deselectExam() {
         selectedExam.set(null);
+        updateSelectedExamStatistics();
     }
 
     /**
@@ -223,7 +230,20 @@ public class ModelManager implements Model {
     }
 
     @Override
-    public ScoreStatistics getExamScoreStatistics(Exam exam) {
+    public ObservableValue<ScoreStatistics> getSelectedExamStatistics() {
+        updateSelectedExamStatistics();
+        return selectedExamStatistics;
+    }
+
+    private void updateSelectedExamStatistics() {
+        if (selectedExam.getValue() == null) {
+            selectedExamStatistics.set(null);
+            return;
+        }
+        selectedExamStatistics.set(getExamScoreStatistics(selectedExam.getValue()));
+    }
+
+    private ScoreStatistics getExamScoreStatistics(Exam exam) {
         // Get all scores for the exam that exist in the filtered persons
         List<Score> scores = filteredPersons.stream()
             .map(person -> person.getScores().get(exam))

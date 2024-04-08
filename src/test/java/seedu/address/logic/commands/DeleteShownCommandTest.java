@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import seedu.address.model.Model;
 import seedu.address.model.ModelManager;
 import seedu.address.model.UserPrefs;
-import seedu.address.model.person.PersonDetailContainsKeywordPredicate;
+import seedu.address.model.person.PersonDetailPredicate;
 
 
 /**
@@ -35,12 +35,12 @@ public class DeleteShownCommandTest {
     public void execute_success() {
         DeleteShownCommand deleteShownCommand = new DeleteShownCommand();
 
-        PersonDetailContainsKeywordPredicate predicate =
-                new PersonDetailContainsKeywordPredicate(PREFIX_NAME, "l");
+        PersonDetailPredicate predicate =
+                new PersonDetailPredicate(PREFIX_NAME, "l");
         model.updateFilteredPersonList(predicate);
 
-        PersonDetailContainsKeywordPredicate predicate2 =
-                new PersonDetailContainsKeywordPredicate(PREFIX_NAME, "o");
+        PersonDetailPredicate predicate2 =
+                new PersonDetailPredicate(PREFIX_NAME, "o");
         expectedModel.updateFilteredPersonList(predicate2);
 
         CommandTestUtil.assertCommandSuccess(deleteShownCommand, model,

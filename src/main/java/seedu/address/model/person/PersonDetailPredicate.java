@@ -2,9 +2,7 @@ package seedu.address.model.person;
 
 import static seedu.address.logic.parser.CliSyntax.PREFIX_ADDRESS;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_EMAIL;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_LESS_THAN;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_MATRIC_NUMBER;
-import static seedu.address.logic.parser.CliSyntax.PREFIX_MORE_THAN;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_NAME;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_PHONE;
 import static seedu.address.logic.parser.CliSyntax.PREFIX_REFLECTION;
@@ -16,12 +14,11 @@ import java.util.function.Predicate;
 import seedu.address.commons.util.StringUtil;
 import seedu.address.commons.util.ToStringBuilder;
 import seedu.address.logic.parser.Prefix;
-import seedu.address.model.exam.Exam;
 
 /**
  * Tests that a {@code Person}'s details contains the keyword given.
  */
-public class PersonDetailContainsKeywordPredicate implements Predicate<Person> {
+public class PersonDetailPredicate implements Predicate<Person> {
     private final Prefix prefix;
     private final String keyword;
 
@@ -30,7 +27,7 @@ public class PersonDetailContainsKeywordPredicate implements Predicate<Person> {
      * @param prefix The prefix to indicate the detail of the person to be searched.
      * @param keyword The keyword to be searched.
      */
-    public PersonDetailContainsKeywordPredicate(Prefix prefix, String keyword) {
+    public PersonDetailPredicate(Prefix prefix, String keyword) {
         this.prefix = prefix;
         this.keyword = keyword;
     }
@@ -73,12 +70,12 @@ public class PersonDetailContainsKeywordPredicate implements Predicate<Person> {
         }
 
         // instanceof handles nulls
-        if (!(other instanceof PersonDetailContainsKeywordPredicate)) {
+        if (!(other instanceof PersonDetailPredicate)) {
             return false;
         }
 
-        PersonDetailContainsKeywordPredicate otherPredicate =
-            (PersonDetailContainsKeywordPredicate) other;
+        PersonDetailPredicate otherPredicate =
+            (PersonDetailPredicate) other;
 
         return keyword.equals(otherPredicate.keyword) && prefix.equals(otherPredicate.prefix);
     }
@@ -91,30 +88,4 @@ public class PersonDetailContainsKeywordPredicate implements Predicate<Person> {
         return new ToStringBuilder(this).add("prefix", prefix.getPrefix())
                                         .add("keyword", keyword).toString();
     }
-
-    /**
-     * Checks if the prefix requires an exam to be selected.
-     * @return True if the prefix is PREFIX_LESSTHAN or PREFIX_GREATERTHAN.
-     */
-    public boolean isExamRequired() {
-        return prefix.equals(PREFIX_LESS_THAN) || prefix.equals(PREFIX_MORE_THAN);
-    }
-
-    /**
-     * Gets the keyword of the PersonDetailContainsKeywordPredicate.
-     * @return The keyword of the PersonDetailContainsKeywordPredicate.
-     */
-    public String getKeyword() {
-        return keyword;
-    }
-
-    /**
-     * Returns a PersonDetailContainsKeyword&ExamPredicate with the same keyword and prefix.
-     * @param exam The exam to be searched.
-     * @return A PersonDetailContainsKeyword&ExamPredicate with the same keyword and prefix.
-     */
-    public PersonDetailContainsKeywordAndExamPredicate withExam(Exam exam) {
-        return new PersonDetailContainsKeywordAndExamPredicate(prefix, keyword, exam);
-    }
 }
-
